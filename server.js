@@ -15,8 +15,8 @@ app.listen(port, function () {
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/Restfultast');
 var UserSchema = new mongoose.Schema({
-    title: { type: String },
-    description: { type: String, default: '' },
+    title: { type: String, required: [true, "title must be at least 2 characters"], minlength:2 },
+    description: { type: String, default: '' , required: [true, "description must be at least 5 characters"], minlength:5},
     completed: { type: Boolean, default: false }
 }, {timestamps: true});
 
@@ -24,7 +24,7 @@ const User = mongoose.model('User', UserSchema);
 
 // retrieve all task
 app.get('/tasks', function (req, res) {
-    console.log("Retrieve all tasl route")
+    console.log("Retrieve all task route")
     User.find({}, function (err, users) {
         if (err) {
             console.log("Error: ", err)
@@ -68,13 +68,13 @@ app.post('/task', function (req, res) {
 app.put('/task/:id', function (req, res){
     User.findOneAndUpdate({_id: req.params.id}, 
         {$set: {title: req.body.title, description: req.body.description, completed: req.body.completed}}, {multi: false}
-        ,function (err){
+        ,function (err, task){
         if(err){
             console.log("Error: " , err)
             res.json({message: "Error", error: err})
         } else{
             
-            res.redirect('/')
+            res.json({message: "success", task: task})
         }
     })
 })
